@@ -33,3 +33,9 @@ The project uses an automated pipeline for consistent preprocessing and predicti
 ```bash
 pip install pandas scikit-learn numpy
 ```
+
+### Live Demo
+
+Experience the live application here:
+
+👉 https://car-prediction-vtdo.onrender.com/
