@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Car Price Predictor</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #4e73df;
+        --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      body {
+        background: var(--bg);
+        font-family: "Poppins", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .container {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 450px;
+        text-align: center;
+      }
+      h1 {
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+      }
+      .form-group {
+        text-align: left;
+        margin-bottom: 1rem;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+      }
+      select,
+      input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 1rem;
+      }
+      #prediction {
+        margin-top: 1.5rem;
+        font-weight: 600;
+        color: #2e59d9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Car Predictor</h1>
+      <form id="prediction-form" method="post">
+        <div class="form-group">
+          <label>Select Company</label>
+          <select
+            name="company"
+            id="company"
+            required
+            onchange="filter_models(this.value)"
+          >
+            <option value="" selected disabled>Select Company</option>
+            {% for company in companies %}
+            <option value="{{ company }}">{{ company }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Select Model</label>
+          <select name="car_model" id="car_model" required>
+            <option value="" selected disabled>Select Model</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Select Year</label>
+          <select name="year" required>
+            {% for year in years %}
+            <option value="{{ year }}">{{ year }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Fuel Type</label>
+          <select name="fuel_type" required>
+            {% for fuel in fuel_types %}
+            <option value="{{ fuel }}">{{ fuel }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Kilometers Driven</label>
+          <input
+            type="number"
+            name="kilo_driven"
+            placeholder="Enter kms"
+            required
+          />
+        </div>
+
+        <button type="button" onclick="send_data()">Predict Price</button>
+      </form>
+      <div id="prediction"></div>
+    </div>
+
+    <script>
+      // This variable holds all car names and their associated companies
+      const all_models = [
+          {% for company in companies %}
+              {% for model in car_models %}
+                  {% if company in model %}
+                      { company: "{{ company }}", name: "{{ model }}" },
+                  {% endif %}
+              {% endfor %}
+          {% endfor %}
+      ];
+
+      function filter_models(selectedCompany) {
+          const modelSelect = document.getElementById('car_model');
+          modelSelect.innerHTML = '<option value="" selected disabled>Select Model</option>'; // Reset
+
+          // Filter and add only matching models
+          all_models.forEach(car => {
+              if (car.company === selectedCompany) {
+                  let newOption = document.createElement("option");
+                  newOption.value = car.name;
+                  newOption.innerHTML = car.name;
+                  modelSelect.options.add(newOption);
+              }
+          });
+      }
+
+      function send_data() {
+          const form = document.getElementById('prediction-form');
+          if(!form.checkValidity()) { form.reportValidity(); return; }
+
+          var fd = new FormData(form);
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', '/predict', true);
+          document.getElementById('prediction').innerHTML = "Predicting...";
+          xhr.onreadystatechange = function() {
+              if(xhr.readyState == XMLHttpRequest.DONE) {
+                  document.getElementById('prediction').innerHTML = "Prediction: ₹" + xhr.responseText;
+              }
+          };
+          xhr.send(fd);
+      }
+    </script>
+  </body>
+</html>
