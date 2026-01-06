@@ -1,0 +1,5 @@
+*.ipynb
+backup_data.csv
+.git
+__pycache__
+.venv
